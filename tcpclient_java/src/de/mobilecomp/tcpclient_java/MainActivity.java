@@ -20,13 +20,13 @@ public class MainActivity {
 	public static int port;
 	public static String messageText;
 	static TCPClient mTCPClient;
+	public static boolean propertiesSet = false;
 
 	/**
 	 * standard Main Method to read User input from Console and then start a TCPClient in a Thread
 	 * @param args
 	 */
 	public static void main(String[] args) {
-
 		/***
 		 * Creation of TCPClient started in a Thread
 		 */
@@ -35,6 +35,9 @@ public class MainActivity {
 				try {
 					mTCPClient = new TCPClient(port, addressText);
 					Thread.sleep(1000);
+					if(mTCPClient!=null) {
+						mTCPClient.run();
+					}
 				}catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -72,26 +75,23 @@ public class MainActivity {
 		BufferedReader input3 = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Eingabe fuer die Nachricht:");
 		try {
-			messageText = input3.readLine();
+			String messageText = input3.readLine();
 			System.out.println("Nachricht: "+messageText+" ist gespeichert");
+			if(messageText=="exit") {
+				return;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
+		
+		
 		//TODO: check for port
-		if((addressText.length()> 0) && (messageText.length()>0)) {
-
+		if((addressText.length()> 0)) {
 			t.run();
 			System.out.println("mTCPClient "+mTCPClient);
-			if (mTCPClient != null) {
-				try {
-					mTCPClient.sendMessage(messageText);
-				} catch (Error e) {
-					e.printStackTrace();
-				}
-
-			}
 		}
+
 		return;
 	}
 }
