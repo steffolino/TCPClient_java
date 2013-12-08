@@ -13,7 +13,7 @@ import java.net.Socket;
 
 /**
  * 
- * @author -
+ * @author - Stefan Stretz, Pascal Lueders, Elen Schicker, Michael Suenkel
  * connects to a tcp server according to port and address
  * sends a message
  * closes connection
@@ -21,15 +21,14 @@ import java.net.Socket;
  */
 public class TCPClient {
 
-	private String serverMessage;
 	//Default settings: to be changed later
+	private String serverMessage;
 	private static String SERVERIP = "127.0.0.1"; //your computer IP address
 	private static int SERVERPORT = 8080;
-	private OnMessageReceived mMessageListener = null;
-	public boolean mRun = false;
 
 	PrintWriter out;
 	BufferedReader in;
+	Socket socket;
 
 	/**
 	 *  Constructor of the class
@@ -47,7 +46,7 @@ public class TCPClient {
 	 * writes message to PrintWriter out
 	 */
 	public void sendMessage(String message){
-		System.out.println("TCPClient: Sending message: "+ message);
+		System.out.println("TCPClient Sending message: "+ message);
 		if (out != null && !out.checkError()) {
 			out.println(message);
 			out.flush();
@@ -55,74 +54,49 @@ public class TCPClient {
 	}
 
 	/**
-	 * stops connection by setting mRun - flag to false
-	 */
-	public void stopClient(){
-		System.out.println("TCPClient: Stopping client");
-		mRun = false;
-	}
-
-	/**
-	 * sets mRun - flag to true
 	 * establishes connection to server
 	 * 
 	 */
 	public void run() {
 
-		mRun = true;
-
 		try {
 			InetAddress serverAddr = InetAddress.getByName(getSERVERIP());
 
-			System.out.println("TCP Client: C: Connecting...");
-			System.out.println("TCP Client: Port: "+getSERVERPORT()+" IP: "+getSERVERIP());
+			System.out.println("TCP Client C: Connecting...");
+			System.out.println("TCP Client Port: "+getSERVERPORT()+" IP: "+getSERVERIP());
 
 			//create a socket to make the connection with the server
-			Socket socket = new Socket(serverAddr, getSERVERPORT());
-
+			this.socket = new Socket(serverAddr, getSERVERPORT());
 			System.out.println("TCPClient "+socket.getPort()+" "+socket.getInetAddress());
+
 			try {
+
 				//send the message to the server
-				System.out.println("TCPClient: Socket Outputstream: "+socket.getOutputStream());
+				System.out.println("TCPClient Socket Outputstream: "+socket.getOutputStream());
 				out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
 
-				sendMessage("Hallo Server");
-				
-				System.out.println("TCP Client C: Sent.");
-
-				System.out.println("TCP Client C: Done.");
-								
 				//receive the message which the server sends back
 				in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
 				//in this while the client listens for the messages sent by the server
-				while (mRun) {
-					serverMessage = in.readLine();
+				serverMessage = in.readLine();
 
-					if (serverMessage != null && mMessageListener != null) {
-						//call the method messageReceived from MyActivity class
-						mMessageListener.messageReceived(serverMessage);
-					}
-					serverMessage = null;
-					//mRun = false;
+				if (serverMessage != null) {
+					//call the method messageReceived from MyActivity class
+					System.out.println("RESPONSE FROM SERVER S: Received Message: '" + serverMessage + "'");
 				}
-
-				System.out.println("RESPONSE FROM SERVER S: Received Message: '" + serverMessage + "'");
+				serverMessage = null;
 
 			} catch (Exception e) {
-
-				System.err.println("TCP S: Error "+ e);
-			} finally {
-				//the socket must be closed. It is not possible to reconnect to this socket
-				// after it is closed, which means a new socket instance has to be created.
-				socket.close();
-				System.out.println("TCPClient Socket closed");
+				System.out.println("TCP S: Error"+e);
 			}
+
 		} catch (Exception e) {
 
-			System.out.println("TCP C: Error "+e);
+			System.out.println("TCP C: Error"+ e);
 
 		}
+
 	}
 
 	/**
@@ -138,7 +112,7 @@ public class TCPClient {
 	 */
 	public void setSERVERPORT(int serverPort) {
 		this.SERVERPORT = serverPort;
-		System.out.println("TCPClient serverPort "+serverPort+" this.Port "+this.SERVERPORT);
+		System.out.println("TCPClient serverPort "+serverPort+"this.Port"+this.SERVERPORT);
 	}
 
 	/**
@@ -156,15 +130,15 @@ public class TCPClient {
 		this.SERVERIP = serverIP;
 	}
 
-
 	/**
-	 * 
-	 * @author -
-	 * handler if server should send a response
-	 * not used yet
+	 * close socket and leave
 	 */
-	//class at on asynckTask doInBackground
-	public interface OnMessageReceived {
-		public void messageReceived(String message);
+	public void close(){	
+		try {
+			this.socket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println("TCPClient Socket closed");
 	}
 }

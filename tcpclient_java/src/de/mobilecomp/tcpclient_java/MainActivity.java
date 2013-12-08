@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 import javax.swing.*;
 
 /**
- * @author - Stefan Stretz, Pascal Lüders
+ * @author - Stefan Stretz, Pascal Lueders, Elen Schicker, Michael Suenkel
  *
  */
 public class MainActivity {
@@ -18,9 +18,10 @@ public class MainActivity {
 	 */
 	public static String addressText;
 	public static int port;
-	public static String messageText;
+	public static String message;
+	static Thread connectT;
+	static Thread sendingT;
 	static TCPClient mTCPClient;
-	public static boolean propertiesSet = false;
 
 	/**
 	 * standard Main Method to read User input from Console and then start a TCPClient in a Thread
@@ -30,13 +31,23 @@ public class MainActivity {
 		/***
 		 * Creation of TCPClient started in a Thread
 		 */
-		Thread t = new Thread() {
+		connectT = new Thread() {
 			public void run(){
 				try {
 					mTCPClient = new TCPClient(port, addressText);
-					Thread.sleep(1000);
-					if(mTCPClient!=null) {
-						mTCPClient.run();
+					mTCPClient.run();
+				}catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		};
+
+		sendingT = new Thread() {
+			public void run(){
+				try {
+					if(mTCPClient != null) {
+						mTCPClient.sendMessage(message);
+						System.out.println(message);
 					}
 				}catch (Exception e) {
 					e.printStackTrace();
@@ -75,23 +86,37 @@ public class MainActivity {
 		BufferedReader input3 = new BufferedReader(new InputStreamReader(System.in));
 		System.out.println("Eingabe fuer die Nachricht:");
 		try {
-			String messageText = input3.readLine();
-			System.out.println("Nachricht: "+messageText+" ist gespeichert");
-			if(messageText=="exit") {
+			message = input3.readLine();
+			System.out.println("Nachricht: "+message+" ist gespeichert");
+			if(message=="exit") {
 				return;
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		
-		
-		//TODO: check for port
-		if((addressText.length()> 0)) {
-			t.run();
-			System.out.println("mTCPClient "+mTCPClient);
+		try {
+			connectT.run();
+			System.out.println("MainActivity: creating TCPClient");			
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
+		try {
+			System.out.println("entered sending msgs");
+			for(int i = 0; i< 10; i++) {
+				sendingT.run();
+				sendingT.sleep(1000);
+			}
+		} catch (Error e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+
+		mTCPClient.close();
+		
 		return;
 	}
 }
