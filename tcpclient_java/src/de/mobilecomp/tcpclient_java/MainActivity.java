@@ -6,7 +6,6 @@ package de.mobilecomp.tcpclient_java;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import javax.swing.*;
 
 /**
  * @author - Stefan Stretz, Pascal Lueders, Elen Schicker, Michael Suenkel
@@ -107,7 +106,7 @@ public class MainActivity {
 			System.out.println("entered sending msgs");
 			for(int i = 0; i< 10; i++) {
 				sendingT.run();
-				sendingT.sleep(1000);
+				Thread.sleep(1000);
 			}
 		} catch (Error e) {
 			e.printStackTrace();
