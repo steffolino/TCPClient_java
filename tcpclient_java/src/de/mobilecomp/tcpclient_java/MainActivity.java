@@ -106,9 +106,9 @@ public class MainActivity {
 		try {
 			System.out.println("entered sending msgs");
 			if(mTCPClient != null) {
-				for(int i = 0; i< 10; i++) {
+				for(int i = 0; i< 100; i++) {
 					sendingT.run();
-					Thread.sleep(1000);
+					Thread.sleep(10);
 				}
 			}
 		} catch (Error e) {
