@@ -96,7 +96,8 @@ public class MainActivity {
 
 		try {
 			connectT.run();
-			System.out.println("MainActivity: creating TCPClient");			
+			connectT.join();
+			System.out.println("MainActivity: created TCPClient");			
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -104,9 +105,11 @@ public class MainActivity {
 
 		try {
 			System.out.println("entered sending msgs");
-			for(int i = 0; i< 10; i++) {
-				sendingT.run();
-				Thread.sleep(1000);
+			if(mTCPClient != null) {
+				for(int i = 0; i< 10; i++) {
+					sendingT.run();
+					Thread.sleep(1000);
+				}
 			}
 		} catch (Error e) {
 			e.printStackTrace();
@@ -114,8 +117,9 @@ public class MainActivity {
 			e.printStackTrace();
 		}
 
-		mTCPClient.close();
-		
+		if(mTCPClient!=null) {
+			mTCPClient.close();
+		}
 		return;
 	}
 }
